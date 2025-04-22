@@ -157,6 +157,7 @@ async function fetchAllTransactions(token) {
 
           for (const tx of jsonData.items) {
             const txId = tx.id;
+            // Possibly not exhaustive
             if (tx?.status && tx.status.includes('CANCELED')) {
               continue;
             }
