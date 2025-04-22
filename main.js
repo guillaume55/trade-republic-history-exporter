@@ -1,4 +1,3 @@
-
 const fs = require("fs");
 const readline = require("readline");
 const https = require("https");
@@ -19,17 +18,6 @@ config = parse(configRaw);
 
 const phoneNumber = config.secret.phone_number;
 const pin = config.secret.pin;
-const outputFormat = config.general.output_format.toLowerCase();
-const outputFolder = config.general.output_folder;
-const extractDetails = config.general.extract_details === "true";
-
-if (!["json", "csv"].includes(outputFormat)) {
-  console.error(`❌ Le format '${outputFormat}' est inconnu. Utilisez 'json' ou 'csv'.`);
-  process.exit(1);
-}
-if (!fs.existsSync(outputFolder)) {
-  fs.mkdirSync(outputFolder, { recursive: true });
-}
 
 // POST REQUEST
 function post(url, data, headers = {}) {
@@ -107,7 +95,7 @@ async function authenticate() {
 }
 
 // FETCH TRANSACTIONS
-async function fetchAllTransactions(token, extractDetails) {
+async function fetchAllTransactions(token) {
   const ws = new WebSocket("wss://api.traderepublic.com");
 
   const allData = [];
@@ -162,24 +150,22 @@ async function fetchAllTransactions(token, extractDetails) {
 
           const cleaned = cleanJson(subResponse);
           const jsonData = JSON.parse(cleaned);
-          console.dir(jsonData, { depth: null, colors: true });
 
           if (!jsonData.items || jsonData.items.length === 0) {
             break;
           }
 
-          if (extractDetails) {
-            for (const tx of jsonData.items) {
-              const txId = tx.id;
-              if (txId) {
-                const [details, newMsgId] = await fetchTransactionDetails(ws, txId, token, messageId);
-                messageId = newMsgId;
-                Object.assign(tx, details);
-              }
-              allData.push(tx);
+          for (const tx of jsonData.items) {
+            const txId = tx.id;
+            if (tx?.status && tx.status.includes('CANCELED')) {
+              continue;
             }
-          } else {
-            allData.push(...jsonData.items);
+            if (txId) {
+              const [details, newMsgId] = await fetchTransactionDetails(ws, txId, token, messageId);
+              messageId = newMsgId;
+              Object.assign(tx, details);
+            }
+            allData.push(tx);
           }
 
           afterCursor = jsonData.cursors?.after;
@@ -206,17 +192,31 @@ async function fetchTransactionDetails(ws, transactionId, token, messageId) {
     id: transactionId,
     token,
   };
-  await ws.send(`sub ${messageId} ${JSON.stringify(payload)}`);
-  const response = await new Promise((resolve) => ws.once("message", (data) => resolve(data.toString())));
-  await ws.send(`unsub ${messageId}`);
-  await new Promise((resolve) => ws.once("message", resolve));
 
-  const start = response.indexOf("{");
-  const end = response.lastIndexOf("}");
-  const data = JSON.parse(response.slice(start, end + 1) || "{}");
+  // Utilitaire : attendre un message WebSocket unique
+  const waitForMessage = () =>
+    new Promise((resolve) => ws.once("message", (data) => resolve(data.toString())));
+
+  // Nettoie les réponses JSON parasites
+  const cleanJson = (msg) => {
+    const start = msg.indexOf("{");
+    const end = msg.lastIndexOf("}");
+    if (start !== -1 && end !== -1) {
+      return msg.slice(start, end + 1);
+    }
+    return "{}";
+  };
+
+  ws.send(`sub ${messageId} ${JSON.stringify(payload)}`);
+  const subResponse = await waitForMessage();
+  ws.send(`unsub ${messageId}`);
+  await waitForMessage(); // confirmation d’unsub
+
+  const cleaned = cleanJson(subResponse);
+  const jsonData = JSON.parse(cleaned);
 
   const transactionData = {};
-  for (const section of data.sections || []) {
+  for (const section of jsonData.sections || []) {
     if (section.title === "Transaction") {
       for (const item of section.data || []) {
         const key = item.title;
@@ -224,77 +224,108 @@ async function fetchTransactionDetails(ws, transactionId, token, messageId) {
         if (key && value) transactionData[key] = value;
       }
     }
+
+    if (section?.action?.type === "instrumentDetail") {
+      // Get Isin
+      transactionData.ISIN = section.action.payload;
+    }
   }
 
   return [transactionData, messageId];
 }
 
 // FORMAT & EXPORT
-function flattenJson(obj, parentKey = "", sep = ".") {
-  return Object.entries(obj).reduce((acc, [key, val]) => {
-    const newKey = parentKey ? `${parentKey}${sep}${key}` : key;
-    if (val && typeof val === "object" && !Array.isArray(val)) {
-      Object.assign(acc, flattenJson(val, newKey, sep));
-    } else {
-      acc[newKey] = val;
-    }
-    return acc;
-  }, {});
+function parseTransactionDetails(tx) {
+  const row = {};
+
+  row.Date = new Date(tx.timestamp).toISOString().split('T')[0];
+  row.Type = getTypeFromEvent(tx.eventType, tx.subtitle);
+  row.Titre = tx.title || "";
+  row.ISIN = tx.ISIN || "";
+  row.Note = tx.subtitle || "";
+  row.Quantité = parseAmount(tx.Titres || tx.Actions || "0");
+  // row.Price = parseAmount(tx["Cours du titre"] || "0"); // Si dividandes par actions : 'Dividende par action'
+  row.Total = tx.amount?.value
+  row.Devise = tx.amount?.currency || "EUR";
+  row.Frais = parseAmount(tx.Frais || "0");
+  row.Taxes = parseAmount(tx.Impôts || "0");
+
+  return row;
 }
 
-function transformData(data) {
-  return data.map((item) => {
-    const transformed = { ...item };
+function getTypeFromEvent(eventType, subtitle) {
+  const lower = (subtitle || "").toLowerCase();
 
-    if (transformed.timestamp) {
-      const d = new Date(transformed.timestamp);
-      transformed.timestamp = d.toLocaleDateString("fr-FR");
-    }
-
-    const montantKeys = [
-      "amount.value",
-      "amount.fractionDigits",
-      "subAmount.value",
-      "subAmount.fractionDigits",
-    ];
-    for (const key of montantKeys) {
-      if (transformed[key]) {
-        const val = parseFloat(transformed[key]);
-        if (!isNaN(val)) transformed[key] = val.toLocaleString("fr-FR");
-      }
-    }
-
-    return transformed;
-  });
-}
-
-async function exportData(data) {
-  const path = `${outputFolder}/trade_republic_transactions.${outputFormat}`;
-
-  if (outputFormat === "json") {
-    fs.writeFileSync(path, JSON.stringify(data, null, 2), "utf-8");
-    console.log(`✅ Données sauvegardées dans '${path}'`);
-  } else {
-    const flattened = data.map(flattenJson);
-    const cleaned = transformData(flattened);
-
-    const headers = [...new Set(cleaned.flatMap((item) => Object.keys(item)))];
-
-    const csvWriter = createObjectCsvWriter({
-      path,
-      header: headers.map((key) => ({ id: key, title: key })),
-      fieldDelimiter: ";",
-      encoding: "utf8",
-    });
-
-    await csvWriter.writeRecords(cleaned);
-    console.log(`✅ Données sauvegardées dans '${path}'`);
+  if (eventType.includes("SAVINGS_PLAN") || eventType.includes("trading_savingsplan_executed") || lower.includes("achat")) {
+    return "Achat";
   }
+  if (lower.includes("vente")) {
+    return "Vente";
+  }
+  if (lower.includes("distribution") || lower.includes('dividende') || eventType === "CREDIT") {
+    return "Dividendes";
+  }
+  if (eventType.includes("INTEREST")) {
+    return "Intérêts";
+  }
+  if (eventType.includes("PAYMENT_INBOUND") || eventType.includes("INCOMING_TRANSFER_DELEGATION")) {
+    return "Dépôt";
+  }
+  if (eventType.includes("PAYMENT_OUTBOUND") || eventType.includes("OUTGOING_TRANSFER_DELEGATION")) {
+    return "Retrait";
+  }
+
+  return "Autre";
+}
+
+function parseAmount(text) {
+  if (text === 'Gratuit') {
+    return 0;
+  }
+  const cleaned = text
+  .replace(',', '.')
+  .replace(/[^\d.-]/g, '');
+  return parseFloat(cleaned);
+}
+
+async function exportToPortfolioPerformance(transactions) {
+  const csvWriter = createObjectCsvWriter({
+    path: `./portfolio_performance_export.csv`,
+
+    header: [
+      { id: "Date", title: "Date" },
+      { id: "Type", title: "Type" },
+      { id: "Titre", title: "Nom du titre" },
+      { id: "ISIN", title: "ISIN" },
+      { id: "Note", title: "Note" },
+      { id: "Quantité", title: "Parts" },
+      // { id: "Price", title: "Prix" },
+      { id: "Devise", title: "Devise de l'opération" },
+      { id: "Frais", title: "Frais" },
+      { id: "Taxes", title: "Impôts / Taxes" },
+      { id: "Total", title: "Valeur" },
+      
+    ],
+    fieldDelimiter: ";",
+    encoding: "utf8",
+  });
+
+  await csvWriter.writeRecords(transactions);
+  console.log("✅ Export Portfolio Performance généré !");
 }
 
 // MAIN
 (async () => {
   const token = await authenticate();
-  const data = await fetchAllTransactions(token, extractDetails);
-  await exportData(data);
+  const data = await fetchAllTransactions(token);
+  console.log(data);
+  const formatted = [];
+  for (const tx of data) {
+    if (!tx.amount || tx.amount.value === 0) {
+      continue;
+    }
+    const row = parseTransactionDetails(tx);
+    formatted.push(row);
+  }
+  await exportToPortfolioPerformance(formatted);
 })();
