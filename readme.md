@@ -25,9 +25,11 @@ cp config.ini.exemple .config.ini
 
 2. Edit .config.ini with your Trade Republic credentials:
 
+```bash
 [secret]
 phone_number=+33xxxxxxxxx
 pin=xxxx
+```
 
 ⚠️ Do not commit .config.ini to version control. It is ignored via .gitignore.
 
@@ -81,7 +83,7 @@ The exported CSV file is structured to be compatible with Portfolio Performance.
 
 ## 🔐 Security Note
 
-Your phone number and PIN are stored locally in .config.ini. Never share or upload this file. For extra safety, use a .env manager or encryption in production environments.
+Your phone number and PIN are stored locally in config.ini. Never share or upload this file. For extra safety, use a .env manager or encryption in production environments.
 
 ## 📜 License
 
