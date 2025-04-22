@@ -2,6 +2,8 @@
 
 This Node.js script connects to the Trade Republic WebSocket API, retrieves your transaction history, and exports a clean `.csv` file compatible with [Portfolio Performance](https://www.portfolio-performance.info/).
 
+> 🧠 **Heavily inspired by**: [BenjaminOddou/trade_republic_scraper](https://github.com/BenjaminOddou/trade_republic_scraper)
+
 ## ✨ Features
 
 - Connects to Trade Republic via WebSocket
