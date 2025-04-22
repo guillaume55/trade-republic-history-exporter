@@ -319,7 +319,6 @@ async function exportToPortfolioPerformance(transactions) {
 (async () => {
   const token = await authenticate();
   const data = await fetchAllTransactions(token);
-  console.log(data);
   const formatted = [];
   for (const tx of data) {
     if (!tx.amount || tx.amount.value === 0) {
