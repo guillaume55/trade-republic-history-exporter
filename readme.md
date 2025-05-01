@@ -20,7 +20,7 @@ This Node.js script connects to the Trade Republic WebSocket API, retrieves your
 1. Copy the example config file:
 
 ```bash
-cp config.ini.exemple .config.ini
+cp config.ini.exemple config.ini
 ```
 
 2. Edit .config.ini with your Trade Republic credentials:
