@@ -1,0 +1,62 @@
+Asset_Name                                  ; Sector        ; Geography        ; Risk_Level ; ESG_Score; Liquidity_Score; Volatility
+"Accor"                                     ; Hospitality   ; France           ; Moyen      ;         5;               6;         35
+"Air Liquide"                               ; Industrial    ; France           ; Moyen      ;         7;               8;         20
+"Airbnb (A)"                                ; Travel        ; États-Unis       ; Élevé      ;         6;               8;         45
+"Airlines, Hotels, Cruise Lines USD (Acc)"  ; Travel        ; Global           ; Élevé      ;         3;               4;         40
+"Airbus"                                    ; Aerospace     ; France           ; Moyen-Élevé;         5;               7;         25
+"Alstom"                                    ; Transportation; France           ; Élevé      ;         7;               6;         40
+"Apple"                                     ; Technology    ; États-Unis       ; Faible     ;         8;              10;         25
+"ARM (ADR)"                                 ; Technology    ; États-Unis       ; Élevé      ;         6;               7;         45
+"ASML"                                      ; Technology    ; Pays-Bas         ; Moyen      ;         7;               9;         35
+"Atos"                                      ; Technology    ; France           ; Très Élevé ;         5;               5;         70
+"Bitcoin"                                   ; Crypto        ; Global           ; Très Élevé ;         3;               6;         80
+"BMW (Vz)"                                  ; Automotive    ; Allemagne        ; Moyen-Élevé;         6;               7;         30
+"Booking Holdings"                          ; Travel        ; États-Unis       ; Moyen-Élevé;         5;               8;         40
+"BYD"                                       ; Automotive    ; Chine            ; Élevé      ;         8;               6;         50
+"Carmat"                                    ; Healthcare    ; France           ; Très Élevé ;         6;               3;         60
+"Compagnie de Saint-Gobain"                 ; Materials     ; France           ; Moyen-Élevé;         4;               6;         30
+"Core MSCI Japan IMI USD (Acc)"             ; ETF - Japan   ; Japon            ; Moyen      ;         6;               8;         20
+"Core MSCI World USD (Acc)"                 ; ETF - Global  ; Global           ; Faible     ;         7;              10;         16
+"Core Nasdaq-100 Swap EUR (Dist)"           ; Technology    ; États-Unis       ; Élevé      ;         6;               8;         30
+"Core S&P 500 USD (Acc)"                    ; ETF - US      ; États-Unis       ; Faible     ;         6;              10;         16
+"Core Stoxx Europe 600 EUR (Acc)"           ; ETF - Europe  ; Europe           ; Faible     ;         6;               9;         18
+"Crossject"                                 ; Healthcare    ; France           ; Très Élevé ;         6;               2;         80
+"Crypto & Blockchain Innovators USD (Acc)"  ; Crypto        ; Global           ; Élevé      ;         5;               5;         50
+"Defense USD (Acc)"                         ; Defense       ; Global           ; Élevé      ;         2;               4;         25
+"Digital Payments USD (Acc)"                ; Financial     ; Global           ; Élevé      ;         6;               6;         35
+"Diversified Commodity Swap USD (Acc)"      ; Commodities   ; Global           ; Moyen-Élevé;         4;               5;         35
+"Eli Lilly & Co"                            ; Healthcare    ; États-Unis       ; Moyen      ;         7;               8;         25
+"EssilorLuxottica"                          ; Healthcare    ; France           ; Moyen      ;         7;               6;         25
+"Estee Lauder"                              ; Consumer Goods; États-Unis       ; Moyen      ;         5;               8;         25
+"Ethereum"                                  ; Crypto        ; Global           ; Très Élevé ;         4;               6;         85
+"European Green Deal EUR (Acc)"             ; ESG           ; Europe           ; Moyen-Élevé;         9;               6;         25
+"Future of Defence USD (Acc)"               ; Defense       ; Global           ; Élevé      ;         2;               4;         25
+"Hilton Worldwide"                          ; Hospitality   ; États-Unis       ; Moyen      ;         6;               8;         35
+"Intérêts"                                  ; Cash          ; EUR              ; Très Faible;         5;              10;          0
+"Listed Private Equity USD (Acc)"           ; Financial     ; Global           ; Élevé      ;         4;               2;         20
+"LVMH Louis Vuitton Moet Hennessy (ADR)"    ; Luxury Goods  ; États-Unis       ; Moyen      ;         6;               8;         30
+"Micron Technology"                         ; Technology    ; États-Unis       ; Élevé      ;         6;               8;         45
+"Microsoft"                                 ; Technology    ; États-Unis       ; Faible     ;         8;              10;         22
+"MSCI EM Asia EUR (Acc)"                    ; ETF - Asia    ; Asie             ; Moyen-Élevé;         6;               5;         25
+"MSCI Emerging Markets EUR (Acc)"           ; ETF - Emerging; Marchés Émergents; Moyen-Élevé;         6;               6;         22
+"MSCI India USD (Acc)"                      ; ETF - India   ; Inde             ; Élevé      ;         5;               7;         25
+"MSCI Robotics & AI ESG Screened EUR (Acc)" ; Technology    ; Global           ; Élevé      ;         6;               6;         30
+"MSCI World Health Care USD (Acc)"          ; Healthcare    ; Global           ; Moyen      ;         7;               7;         20
+"MSCI World Small Cap USD (Acc)"            ; ETF - Global  ; Global           ; Moyen-Élevé;         6;               5;         22
+"NASDAQ 100 3x Lev USD (Acc)"               ; Technology    ; États-Unis       ; Très Élevé ;         5;               6;         75
+"Novo Nordisk (ADR)"                        ; Healthcare    ; États-Unis       ; Moyen      ;         8;               8;         25
+"NVIDIA"                                    ; Technology    ; États-Unis       ; Élevé      ;         7;               9;         40
+"PEA Obligations d'Etat Euro EUR (Acc)"     ; Bonds         ; France           ; Très Faible;         5;               8;          3
+"PepsiCo"                                   ; Consumer Goods; États-Unis       ; Moyen      ;         5;               9;         18
+"Physical Silver"                           ; Commodities   ; Global           ; Moyen-Élevé;         3;               5;         25
+"S&P 500 Equal Weight USD (Acc)"            ; ETF - US      ; États-Unis       ; Moyen      ;         6;               8;         18
+"S&P Global Luxury EUR (Acc)"               ; Luxury Goods  ; Global           ; Moyen      ;         5;               6;         25
+"Safran"                                    ; Aerospace     ; France           ; Moyen      ;         6;               7;         25
+"Snowflake (A)"                             ; Technology    ; États-Unis       ; Très Élevé ;         7;               7;         70
+"Stellantis"                                ; Automotive    ; Pays-Bas         ; Élevé      ;         5;               6;         40
+"Tesla"                                     ; Automotive    ; États-Unis       ; Très Élevé ;         7;               9;         65
+"TotalEnergies"                             ; Energy        ; France           ; Moyen      ;         3;               8;         28
+"TSMC (ADR)"                                ; Technology    ; Taïwan           ; Moyen-Élevé;         7;               9;         40
+"Ubisoft"                                   ; Technology    ; France           ; Élevé      ;         6;               6;         50
+"Uranium And Nuclear Technologies USD (Acc)"; Energy        ; Global           ; Élevé      ;         4;               4;         55
+"VINCI"                                     ; Construction  ; France           ; Moyen      ;         6;               8;         20
