@@ -9,6 +9,7 @@ This Node.js script connects to the Trade Republic WebSocket API, retrieves your
 - Connects to Trade Republic via WebSocket
 - Parses executed transactions (Buy, Sell, Dividend, etc.)
 - Exports a clean CSV for Portfolio Performance
+- UI available for basic analytics
 
 ## 🛠️ Requirements
 
@@ -47,7 +48,19 @@ Run the script:
 node main.js
 ```
 
-This will create a portfolio_performance_export.csv file in the root directory.
+This will create a YYYY-MM-DD.csv file in the exports directory.
+
+## UI usage
+Open index.html UI in browser and drop exported data (exports/YYYY-MM-DD.csv). 
+Load enrichment by dropping enrichment.csv to dropzone. No waranty are provided on this file and data that are valid at the time of commit can evolve over time. 
+
+### Disclamer
+The provided analysis is only for test purposes and can't be used to take financial decisions with real money. 
+The geographical, sectorial and other types of analysis are based on arbitrary data and cannot be used to manage real money. 
+
+### Enrichment.csv
+Please contribute to enrichment.csv file by adding your positions to CSV file 
+
 
 ## 🌐 Language Support
 
@@ -77,8 +90,13 @@ The exported CSV file is structured to be compatible with Portfolio Performance.
 ├── config.ini.exemple                  # Example config file
 ├── package.json                        # Project dependencies
 ├── package-lock.json                   # Lock file
-├── portfolio_performance_export.csv    # Exported CSV result
+├── exports/                            # History of exported exports
 └── node_modules/                       # Installed dependencies
+└── ui/                                 # Folder for optionnal UI
+    └── enrichments.csv                 # Drop this folder to UI dropzone to get basic analytics. No waranty can be given on analysed data
+    └── index.html                      # Basic UI
+    └── style.css                       # Style for UI
+    └── script.js                       # JS functions for UI
 ```
 
 ## 🔐 Security Note

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyseur Portfolio Trade Republic - Dropzone</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Analyseur Portfolio Trade Republic</h1>
+            <p>Glissez-déposez vos fichiers CSV pour analyser votre portfolio</p>
+        </div>
+        
+        <div class="dropzone-container">
+            <div class="dropzone" onclick="document.getElementById('fileInput').click()">
+                <div class="dropzone-content">
+                    <div class="dropzone-icon">📁</div>
+                    <div class="dropzone-text">
+                        Glissez vos fichiers CSV ici
+                    </div>
+                    <div class="dropzone-subtext">
+                        ou cliquez pour sélectionner des fichiers
+                        <br>
+                        Formats supportés: .csv
+                    </div>
+                </div>
+            </div>
+            <input type="file" id="fileInput" class="file-input" multiple accept=".csv" />
+            
+            <div id="uploadedFiles" class="uploaded-files" style="display: none;">
+                <h3>Fichiers chargés</h3>
+                <div id="filesList"></div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-analyze" onclick="analyzeAllFiles()" style="padding: 12px 30px; font-size: 1.1em;">
+                        📈 Analyser tous les fichiers
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="analysisContainer" class="analysis-container">
+            <div style="padding: 30px;">
+                <div class="risk-overview">
+                    <div class="risk-card" id="diversificationCard">
+                        <div class="risk-score" id="diversificationScore">-</div>
+                        <div class="risk-label">Diversification</div>
+                        <div class="risk-description" id="diversificationDesc">Analyse en cours...</div>
+                    </div>
+                    
+                    <div class="risk-card" id="concentrationCard">
+                        <div class="risk-score" id="concentrationScore">-</div>
+                        <div class="risk-label">Concentration</div>
+                        <div class="risk-description" id="concentrationDesc">Analyse en cours...</div>
+                    </div>
+                    
+                    <div class="risk-card" id="volatilityCard">
+                        <div class="risk-score" id="volatilityScore">-</div>
+                        <div class="risk-label">Risque Global</div>
+                        <div class="risk-description" id="volatilityDesc">Analyse en cours...</div>
+                    </div>
+                    
+                    <div class="risk-card" id="performanceCard">
+                        <div class="risk-score" id="performanceScore">-</div>
+                        <div class="risk-label">Performance</div>
+                        <div class="risk-description" id="performanceDesc">Analyse en cours...</div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalValue">-</div>
+                        <div class="stat-label">Valeur Totale</div>
+                    </div>
+                    <div class="stat-card" title="Nombre de positions">
+                        <div class="stat-value" id="totalPositions">-</div>
+                        <div class="stat-label">Positions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="rendement">-</div>
+                        <div class="stat-label">Rendement</div>
+                    </div>
+                    <div class="stat-card" title="Durabilité du portefeuille (Environnementale, Sociétale, Gouvernance)">
+                        <div class="stat-value" id="esg">-</div>
+                        <div class="stat-label">Score de durabilité (ESG)</div>
+                    </div>
+                </div>
+                
+                <div class="charts-grid">
+                    <div class="chart-container evolution-chart">
+                        <div class="chart-title">📈 Évolution du Portfolio</div>
+                        <canvas id="evolutionChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-title">🏭 Exposition Sectorielle</div>
+                        <canvas id="sectorChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">🌍 Exposition Géographique</div>
+                        <canvas id="geoChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-title">💰 Top 10 Positions</div>
+                        <canvas id="topPositionsChart"></canvas>
+                    </div>
+                    <div class="chart-container" style="display: none;">
+                        <div class="chart-title">⚖️ Répartition Risque/Rendement</div>
+                        <canvas id="riskReturnChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="table-section">
+                    <div class="table-title">📋 Détail des Positions</div>
+                    <div class="table-container">
+                        <table id="positionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Ticker</th>
+                                    <th>Secteur</th>
+                                    <th>Région</th>
+                                    <th>Total investi</th>
+                                    <th>Pondération</th>
+                                    <th>Risque</th>
+                                    <th>Score ESG</th>
+                                    <th>Positions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+ 

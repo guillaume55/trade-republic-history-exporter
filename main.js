@@ -4,6 +4,7 @@ const https = require("https");
 const { parse } = require("ini");
 const WebSocket = require("ws");
 const { createObjectCsvWriter } = require("csv-writer");
+const path = require("path");
 
 // === CONFIGURATION ===
 const CONFIG_FILE = "config.ini";
@@ -146,7 +147,7 @@ async function fetchAllTransactions(token) {
           const subResponse = await waitForMessage();
 
           ws.send(`unsub ${messageId}`);
-          await waitForMessage(); // confirmation d’unsub
+          await waitForMessage(); // confirmation d'unsub
 
           const cleaned = cleanJson(subResponse);
           const jsonData = JSON.parse(cleaned);
@@ -211,7 +212,7 @@ async function fetchTransactionDetails(ws, transactionId, token, messageId) {
   ws.send(`sub ${messageId} ${JSON.stringify(payload)}`);
   const subResponse = await waitForMessage();
   ws.send(`unsub ${messageId}`);
-  await waitForMessage(); // confirmation d’unsub
+  await waitForMessage(); // confirmation d'unsub
 
   const cleaned = cleanJson(subResponse);
   const jsonData = JSON.parse(cleaned);
@@ -245,11 +246,12 @@ function parseTransactionDetails(tx) {
   row.ISIN = tx.ISIN || "";
   row.Note = tx.subtitle || "";
   row.Quantité = parseAmount(tx.Titres || tx.Actions || "0");
-  // row.Price = parseAmount(tx["Cours du titre"] || "0"); // Si dividandes par actions : 'Dividende par action'
   row.Total = tx.amount?.value
   row.Devise = tx.amount?.currency || "EUR";
   row.Frais = parseAmount(tx.Frais || "0");
   row.Taxes = parseAmount(tx.Impôts || "0");
+  row.Price = parseAmount(tx["Cours du titre"] || "0"); // Si dividandes par actions : 'Dividende par action'
+
 
   return row;
 }
@@ -290,9 +292,17 @@ function parseAmount(text) {
 }
 
 async function exportToPortfolioPerformance(transactions) {
+  const d = new Date();
+  const fileName = d.toLocaleDateString("fr-CA", { timeZone: "Europe/Paris" }); // ex. 2025-09-27
+  const filePath = `./exports/${fileName}.csv`;
+  
+  // Créer le dossier exports s'il n'existe pas
+  if (!fs.existsSync('./exports')) {
+    fs.mkdirSync('./exports');
+  }
+  
   const csvWriter = createObjectCsvWriter({
-    path: `./portfolio_performance_export.csv`,
-
+    path: filePath,
     header: [
       { id: "Date", title: "Date" },
       { id: "Type", title: "Type" },
@@ -300,32 +310,50 @@ async function exportToPortfolioPerformance(transactions) {
       { id: "ISIN", title: "ISIN" },
       { id: "Note", title: "Note" },
       { id: "Quantité", title: "Parts" },
-      // { id: "Price", title: "Prix" },
       { id: "Devise", title: "Devise de l'opération" },
       { id: "Frais", title: "Frais" },
       { id: "Taxes", title: "Impôts / Taxes" },
       { id: "Total", title: "Valeur" },
-      
+      { id: "Price", title: "Prix" },
     ],
     fieldDelimiter: ";",
     encoding: "utf8",
   });
 
   await csvWriter.writeRecords(transactions);
+  
   console.log("✅ Export Portfolio Performance généré !");
+  console.log(`📁 Fichier: ${filePath}`);
+  console.log(`💰 Valeur totale investie: ${metadata.totalValue.toFixed(2)}€`);
+  console.log(`📊 ${metadata.transactionCount} transactions exportées`);
+  
 }
+
 
 // MAIN
 (async () => {
-  const token = await authenticate();
-  const data = await fetchAllTransactions(token);
-  const formatted = [];
-  for (const tx of data) {
-    if (!tx.amount || tx.amount.value === 0) {
-      continue;
+  console.log("🚀 Démarrage de l'extracteur Trade Republic");
+  try {
+    const token = await authenticate();
+    console.log("📥 Récupération des transactions...");
+    
+    const data = await fetchAllTransactions(token);
+    console.log(`✅ ${data.length} transactions récupérées`);
+    
+    const formatted = [];
+    for (const tx of data) {
+      if (!tx.amount || tx.amount.value === 0) {
+        continue;
+      }
+      const row = parseTransactionDetails(tx);
+      formatted.push(row);
     }
-    const row = parseTransactionDetails(tx);
-    formatted.push(row);
+    
+    console.log(`📋 ${formatted.length} transactions formatées`);
+    await exportToPortfolioPerformance(formatted);
+    
+  } catch (error) {
+    console.error("❌ Erreur lors de l'extraction:", error.message);
+    process.exit(1);
   }
-  await exportToPortfolioPerformance(formatted);
 })();
